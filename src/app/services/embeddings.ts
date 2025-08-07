@@ -13,7 +13,9 @@ export async function getEmbeddings(input: string) {
       input: input.replace(/\n/g, ' ')
     })
 
-    const result = await response.json();
+    const text = await response.text();
+    // console.log("OpenAI raw response:", text);
+    const result = JSON.parse(text);
 
     // Defensive: check for error or missing data
     if (!result.data || !Array.isArray(result.data) || !result.data[0]?.embedding) {

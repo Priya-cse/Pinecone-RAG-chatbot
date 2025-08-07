@@ -30,7 +30,7 @@ const Page: React.FC = () => {
           <Chat setContext={setContext} context={context} />
         </div>
         <div className="fixed top-0 right-0 p-4">
-          <a href="https://github.com/pinecone-io/pinecone-rag-demo" target="_blank" rel="noopener noreferrer">
+          <a href="https://github.com/Priya-cse/Pinecone-RAG-chatbot.git" target="_blank" rel="noopener noreferrer">
             <FaGithub size={32} />
           </a>
         </div>

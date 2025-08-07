@@ -47,7 +47,7 @@ export async function POST(req: Request) {
     const data = new StreamData();   
 
     const result = await streamText({
-      model: openai("gpt-4o"),
+      model: openai("gpt-4o-mini"),
       system: prompt,
       messages: convertToCoreMessages(sanitizedMessages.filter((message: Message) => message.role === 'user')),
       onFinish: async () => {
