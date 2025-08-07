@@ -53,7 +53,7 @@ export const Sidebar: React.FC = () => {
   const [splittingMethod, setSplittingMethod] = useState<string>("markdown");
   const [chunkSize, setChunkSize] = useState<number>(256);
   const [overlap, setOverlap] = useState<number>(1);
-  const [url, setUrl] = useState<string>(entries[0].url);
+  const [urlInput, setUrlInput] = useState<string>("");
   const [clearIndexComplete, setClearIndexCompleteMessageVisible] = useState<boolean>(false)
   const [crawling, setCrawling] = useState<boolean>(false)
   const [crawlingDoneVisible, setCrawlingDoneVisible] = useState<boolean>(false)
@@ -75,24 +75,29 @@ export const Sidebar: React.FC = () => {
   }
 
   const handleEmbedAndUpsertClick = async () => {
-    setCrawling(true)
-    await crawlDocument(
-      url,
-      setEntries,
-      setCards,
-      splittingMethod,
-      chunkSize,
-      overlap
-    )
-
-    setCrawling(false)
-    setCrawlingDoneVisible(true)
+    setCrawling(true);
+    // Split input by newlines or commas, trim, and filter out empty lines
+    const urlList = urlInput
+      .split(/\n|,/)
+      .map((u) => u.trim())
+      .filter((u) => u.length > 0);
+    for (const singleUrl of urlList) {
+      await crawlDocument(
+        singleUrl,
+        setEntries,
+        setCards,
+        splittingMethod,
+        chunkSize,
+        overlap
+      );
+    }
+    setCrawling(false);
+    setCrawlingDoneVisible(true);
     setTimeout(() => {
-      setCrawlingDoneVisible(false)
-      console.log("it's time")
-      refreshIndex()
-    }, 2000)
-  }
+      setCrawlingDoneVisible(false);
+      refreshIndex();
+    }, 2000);
+  };
 
   const handleClearIndexClick = async () => {
     await clearIndex(setEntries, setCards)
@@ -128,19 +133,15 @@ export const Sidebar: React.FC = () => {
       </div>
       <div className="flex flex-column w-full" style={{ ...styles.textHeaderWrapper, flexDirection: "column", }}>
         <div className="mb-6 w-full">
-          <h4 style={styles.h4}>Select demo url to index</h4>
-          <Select className="w-full" value={url} data-testid="url-selector" onChange={handleUrlChange} IconComponent={ExpandMoreIcon} MenuProps={{
-            keepMounted: true,
-            PaperProps: {
-              style: {
-                width: 'fit-content',
-                marginLeft: 15,
-                marginTop: 10,
-              },
-            },
-          }}>
-            {menuItems}
-          </Select>
+          <h4 style={styles.h4}>Enter one or more URLs to index</h4>
+          <textarea
+            className="w-full border rounded p-2 text-sm"
+            rows={3}
+            placeholder="Enter URLs, one per line or comma-separated"
+            value={urlInput}
+            onChange={(e) => setUrlInput(e.target.value)}
+            style={{ marginBottom: 8 }}
+          />
         </div>
         <div className="mb-6 w-full">
           <h4 style={styles.h4} className="flex items-center">
@@ -246,10 +247,10 @@ export const Sidebar: React.FC = () => {
         </div>
       </div>
       <div className="flex flex-col w-full">
-        {cards.map((card, index) => (
+        {(cards ?? []).map((card, index) => (
           <Card key={index} card={card} index={index} context={null} id={card.id} />
         ))}
-        {cards.length > 0 && (<div className="text-[#72788D]">End of results</div>)}
+        {(cards?.length ?? 0) > 0 && (<div className="text-[#72788D]">End of results</div>)}
       </div>
 
     </div>

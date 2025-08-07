@@ -9,12 +9,19 @@ const openai = new OpenAIApi(config)
 export async function getEmbeddings(input: string) {
   try {
     const response = await openai.createEmbedding({
-      model: "text-embedding-ada-002",
+      model: "text-embedding-3-small",
       input: input.replace(/\n/g, ' ')
     })
 
     const result = await response.json();
-    return result.data[0].embedding as number[]
+
+    // Defensive: check for error or missing data
+    if (!result.data || !Array.isArray(result.data) || !result.data[0]?.embedding) {
+      throw new Error(`OpenAI API error or unexpected response: ${JSON.stringify(result)}`);
+    }
+
+    // Truncate embedding to 512 dimensions for Pinecone compatibility
+    return result.data[0].embedding.slice(0, 512) as number[];
 
   } catch (e) {
     console.log("Error calling OpenAI embedding API: ", e);
